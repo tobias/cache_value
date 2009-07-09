@@ -6,7 +6,7 @@ class Cacher
   extend CacheValue::ClassMethods
   include CacheValue::InstanceMethods
   
-  cache_value :do_something, nil
+  cache_value :do_something, 'yo'
   
   def do_something
     'blech'
