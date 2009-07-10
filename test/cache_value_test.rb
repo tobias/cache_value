@@ -19,7 +19,8 @@ class CacheValueTest < Test::Unit::TestCase
     @cacher = CacheTestClass.new
   end
 
-  should 'call the caching method' do
+  should 'delegate the cache lookup to CacheMachine' do
+    CacheValue::CacheMachine.expects(:lookup).with(@cacher, :do_something, 'yo')
     @cacher.do_something
   end
   

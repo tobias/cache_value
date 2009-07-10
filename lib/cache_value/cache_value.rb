@@ -11,8 +11,8 @@ module CacheValue
   module ClassMethods
     include Util
     
-    def cache_value(method, *options)
-      cached_values[method] = options
+    def cache_value(method, option)
+      cached_values[method] = option
     end
     
 
@@ -21,11 +21,11 @@ module CacheValue
     end
 
     def build_caching_methods
-      cached_values.each do |method, options|
+      cached_values.each do |method, option|
         without_method, with_method = caching_method_names(method)
         class_eval do
           define_method with_method do
-            cache_and_return_value(method, options)
+            cache_and_return_value(method, option)
           end
           
           alias_method without_method, method
@@ -44,8 +44,8 @@ module CacheValue
     end
     
     private
-    def cache_and_return_value(method, options)
-      send(self.class.caching_method_names(method).first)
+    def cache_and_return_value(method, option)
+      CacheValue::CacheMachine.lookup(self, method, option)
     end
   end
 
