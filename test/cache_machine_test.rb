@@ -110,8 +110,16 @@ class CacheMachineTest < Test::Unit::TestCase
     context 'checking with block' do
       should 'pass the proper fields to the proc' do
         now = Time.now
-        proc = lambda { }
+        proc = lambda { |a,b,c,d|}
         proc.expects(:call).with(@value, now, @obj, @method)
+
+        @cm.cached_value_is_still_valid?(@value, now, @obj, @method, proc)
+      end
+
+      should 'only pass value and time if the proc only takes two args' do
+        now = Time.now
+        proc = lambda { |a,b|}
+        proc.expects(:call).with(@value, now)
 
         @cm.cached_value_is_still_valid?(@value, now, @obj, @method, proc)
       end
