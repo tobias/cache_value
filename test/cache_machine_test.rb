@@ -99,11 +99,11 @@ class CacheMachineTest < Test::Unit::TestCase
     
     context 'checking by age in seconds' do
       should 'be valid if the value is younger than the age limit' do
-        @cm.cached_value_is_still_valid?(@value, Time.now - 30, @obj, @method, 5).should == true
+        @cm.cached_value_is_still_valid?(@value, Time.now - 30, @obj, @method, 35).should == true
       end
 
       should 'not be valid if the value is older than the age limit' do
-        @cm.cached_value_is_still_valid?(@value, Time.now - 30, @obj, @method, 35).should == false
+        @cm.cached_value_is_still_valid?(@value, Time.now - 30, @obj, @method, 5).should == false
       end
     end
     

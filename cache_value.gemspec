@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
      "lib/cache_value.rb",
      "lib/cache_value/cache_machine.rb",
      "lib/cache_value/cache_value.rb",
+     "lib/cache_value/util.rb",
      "test/cache_machine_test.rb",
      "test/cache_value_test.rb",
      "test/test_helper.rb"

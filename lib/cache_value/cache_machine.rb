@@ -57,7 +57,7 @@ module CacheValue
         if options.is_a? Proc
           options.call(value, cached_age, object, method)
         else
-          cached_age < Time.now - options
+          cached_age > Time.now - options
         end
       end
     end
