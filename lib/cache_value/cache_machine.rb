@@ -2,7 +2,7 @@ require 'active_support/core_ext/array'
 require 'active_support/core_ext/class'
 require 'active_support/inflector'
 require 'active_support/cache'
-require 'cache_value/cache_value'
+require 'cache_value/util'
 
 module CacheValue
   class CacheMachine

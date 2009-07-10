@@ -4,13 +4,13 @@ require 'cache_value/cache_value'
 
 class CacheTestClass
   extend CacheValue::ClassMethods
-  include CacheValue::InstanceMethods
-  
-  cache_value :do_something, 'yo'
   
   def do_something
     'blech'
   end
+  
+  cache_value :do_something, 'yo'
+
 end
 
 class CacheValueTest < Test::Unit::TestCase
