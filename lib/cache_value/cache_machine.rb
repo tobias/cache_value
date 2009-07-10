@@ -55,9 +55,7 @@ module CacheValue
 
       def cached_value_is_still_valid?(value, cached_age, object, method, options)
         if options.is_a? Proc
-          args = [value, cached_age]
-          args += [object, method] if options.arity == 4
-          options.call(*args)
+          options.call(*([cached_age, object, method][0,options.arity]))
         else
           cached_age > Time.now - options
         end
