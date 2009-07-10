@@ -1,6 +1,16 @@
 module CacheValue
+  module Util
+    def caching_method_names(method)
+      washed_method = method.to_s.sub(/([?!=])$/, '')
+      punctuation = $1
+      ["#{washed_method}_without_value_caching#{punctuation}",
+       "#{washed_method}_with_value_caching#{punctuation}"]
+    end
+  end
+  
   module ClassMethods
-
+    include Util
+    
     def cache_value(method, *options)
       cached_values[method] = options
     end
@@ -24,12 +34,7 @@ module CacheValue
       end
     end
 
-    def caching_method_names(method)
-      washed_method = method.to_s.sub(/([?!=])$/, '')
-      punctuation = $1
-      ["#{washed_method}_without_value_caching#{punctuation}",
-       "#{washed_method}_with_value_caching#{punctuation}"]
-    end
+   
   end
 
   module InstanceMethods
@@ -43,4 +48,6 @@ module CacheValue
       send(self.class.caching_method_names(method).first)
     end
   end
+
+
 end
