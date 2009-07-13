@@ -3,6 +3,7 @@ require 'active_support/core_ext/class'
 require 'active_support/inflector'
 require 'active_support/cache'
 require 'cache_value/util'
+require 'sha1'
 
 module CacheValue
   class CacheMachine
@@ -23,22 +24,24 @@ module CacheValue
         File.join(RAILS_ROOT, 'tmp', 'cache_value_caches')
       end
 
-      def lookup(object, method, options)
-        value, last_cached = fetch_and_parse(object, method)
+      def lookup(object, method, options, arguments = nil)
+        value, last_cached = fetch_and_parse(object, method, arguments)
         if !last_cached or !cached_value_is_still_valid?(value, last_cached, object, method, options)
-          value = call_and_store_value(object, method)
+          value = call_and_store_value(object, method, arguments)
         end
         
         value
       end
       
-      def cache_key(object, method)
+      def cache_key(object, method, arguments = nil)
         raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key") unless object.respond_to?(:cache_key)
-        object.cache_key.gsub('/', '_') + "_#{method}"
+        key = object.cache_key.gsub('/', '_') + "_#{method}"
+        key << '_' + Digest::SHA1.hexdigest(arguments.to_yaml) if arguments
+        key
       end
 
-      def fetch_and_parse(object, method)
-        data = cache_store.fetch(cache_key(object, method))
+      def fetch_and_parse(object, method, arguments = nil)
+        data = cache_store.fetch(cache_key(object, method, arguments))
         if data
           YAML::load(data)
         else
@@ -46,15 +49,17 @@ module CacheValue
         end
       end
 
-      def call_and_store_value(object, method)
-        value = object.send(caching_method_names(method).first)
-        cache_store.write(cache_key(object, method), [value, Time.now].to_yaml)
+      def call_and_store_value(object, method, arguments = nil)
+        without_method = caching_method_names(method).first
+        value = arguments ? object.send(without_method, arguments) : object.send(without_method)
+        cache_store.write(cache_key(object, method, arguments), [value, Time.now].to_yaml)
         
         value
       end
 
       def cached_value_is_still_valid?(value, cached_age, object, method, options)
-        if options.is_a? Proc
+        options = object.send(:method, options) if options.is_a?(Symbol)
+        if options.respond_to?(:arity)          
           options.call(*([cached_age, object, method][0,options.arity]))
         else
           cached_age > Time.now - options
