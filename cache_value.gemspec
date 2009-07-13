@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cache_value}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tobias Crawley"]
-  s.date = %q{2009-07-10}
+  s.date = %q{2009-07-13}
   s.email = %q{tcrawley@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "cache_value.gemspec",
      "lib/cache_value.rb",
      "lib/cache_value/cache_machine.rb",
      "lib/cache_value/cache_value.rb",
