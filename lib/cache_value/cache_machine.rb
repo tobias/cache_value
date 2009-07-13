@@ -51,7 +51,7 @@ module CacheValue
 
       def call_and_store_value(object, method, arguments = nil)
         without_method = caching_method_names(method).first
-        value = arguments ? object.send(without_method, arguments) : object.send(without_method)
+        value = arguments ? object.send(without_method, *arguments) : object.send(without_method)
         cache_store.write(cache_key(object, method, arguments), [value, Time.now].to_yaml)
         
         value

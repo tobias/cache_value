@@ -8,8 +8,8 @@ module CacheValue
     def cache_value(method, option)
       without_method, with_method = caching_method_names(method)
       class_eval do
-        define_method with_method do
-          CacheValue::CacheMachine.lookup(self, method, option)
+        define_method with_method do |*args|
+          CacheValue::CacheMachine.lookup(self, method, option, args)
         end
         
         alias_method without_method, method
