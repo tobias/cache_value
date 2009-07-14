@@ -3,7 +3,6 @@ require 'active_support/core_ext/class'
 require 'active_support/inflector'
 require 'active_support/cache'
 require 'cache_value/util'
-require 'sha1'
 
 module CacheValue
   class CacheMachine
@@ -36,7 +35,7 @@ module CacheValue
       def cache_key(object, method, arguments = nil)
         raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key") unless object.respond_to?(:cache_key)
         key = object.cache_key.gsub('/', '_') + "_#{method}"
-        key << '_' + Digest::SHA1.hexdigest(arguments.to_yaml) if arguments
+        key << '_' + hex_digest(arguments) if arguments
         key
       end
 
@@ -65,6 +64,7 @@ module CacheValue
           cached_age > Time.now - options
         end
       end
+
     end
   end
 

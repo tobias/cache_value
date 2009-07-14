@@ -4,7 +4,7 @@ require 'cache_value/cache_machine'
 
 
 class CacheMachineTest < Test::Unit::TestCase
-  
+
   def setup
     @cm = CacheValue::CacheMachine
     @obj = mock
@@ -68,7 +68,7 @@ class CacheMachineTest < Test::Unit::TestCase
 
       should 'should include the hash in the key' do
         now = Time.now
-        assert_match /_method_#{Digest::SHA1.hexdigest([1, 2, now].to_yaml)}$/, @cm.cache_key(@obj, :method, [1, 2, now])
+        assert_match /_method_#{@cm.send(:hex_digest, [1, 2, now])}$/, @cm.cache_key(@obj, :method, [1, 2, now])
       end
 
     end
