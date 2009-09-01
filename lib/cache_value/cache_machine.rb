@@ -19,7 +19,11 @@ module CacheValue
       end
 
       def default_storage_dir
-        raise ConfigurationException.new('Not running under rails. Set the cache_store type and location manually using CacheValue::CacheMachine.store_option=') unless defined?(RAILS_ROOT)
+        if !defined?(RAILS_ROOT)
+          raise ConfigurationException.new('Not running under rails. Set the cache_store type ' +
+                                           'and location manually using CacheValue::CacheMachine.cache_store=')
+        end
+        
         File.join(RAILS_ROOT, 'tmp', 'cache_value_caches')
       end
 
@@ -33,7 +37,10 @@ module CacheValue
       end
       
       def cache_key(object, method, arguments = nil)
-        raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key") unless object.respond_to?(:cache_key)
+        if !object.respond_to?(:cache_key)
+          raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key")
+        end
+        
         key = object.cache_key.gsub('/', '_') + "_#{method}"
         key << '_' + hex_digest(arguments) if arguments
         key
