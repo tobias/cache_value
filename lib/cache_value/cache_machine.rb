@@ -3,6 +3,7 @@ require 'active_support/core_ext/class'
 require 'active_support/inflector'
 require 'active_support/cache'
 require 'cache_value/util'
+require 'benchmark'
 
 module CacheValue
   class CacheMachine
@@ -63,7 +64,12 @@ module CacheValue
 
     def call_and_store_value
       without_method = caching_method_names(cached_method).first
-      value = arguments ? object.send(without_method, *arguments) : object.send(without_method)
+      value = nil
+      time = Benchmark.realtime do 
+        value = arguments ? object.send(without_method, *arguments) : object.send(without_method)
+      end
+      logger.info "cache_value: cached #{object.class.name}##{cached_method} (will save #{(time*1000).round(1)}ms)"
+      
       self.class.cache_store.write(cache_key, value.to_yaml)
 
       value

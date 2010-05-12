@@ -2,9 +2,11 @@ require 'test_helper'
 
 require 'cache_value/cache_machine'
 
+require 'logger'
 
 class CacheMachineTest < Test::Unit::TestCase
-
+  ::RAILS_DEFAULT_LOGGER = Logger.new('/dev/null')
+  
   def setup
     @obj = mock
     @method = :some_method
@@ -150,7 +152,6 @@ class CacheMachineTest < Test::Unit::TestCase
       end
     end
     
-    should 'raise exception if options do not resolve to a hash '
   end
 
   context 'cache lookup' do

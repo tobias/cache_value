@@ -13,6 +13,10 @@ module CacheValue
       Digest::SHA1.hexdigest(stringify_value(values))
     end
     
+    def logger
+      ::RAILS_DEFAULT_LOGGER
+    end
+    
     protected
     def stringify_value(value)
       if value.respond_to?(:to_str)
