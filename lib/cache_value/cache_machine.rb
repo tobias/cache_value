@@ -6,75 +6,85 @@ require 'cache_value/util'
 
 module CacheValue
   class CacheMachine
-    extend Util
-    
+    include Util
+
     class << self
 
       def cache_store=(*store_option)
-        @cache_store = store_option ? ActiveSupport::Cache.lookup_store(store_option) : nil
-      end
-      
-      def cache_store
-        @cache_store ||= ActiveSupport::Cache.lookup_store(:file_store, default_storage_dir)
+        @cache_store = store_option ? ActiveSupport::Cache.lookup_store(*store_option) : nil
       end
 
-      def default_storage_dir
-        if !defined?(RAILS_ROOT)
-          raise ConfigurationException.new('Not running under rails. Set the cache_store type ' +
-                                           'and location manually using CacheValue::CacheMachine.cache_store=')
-        end
-        
-        File.join(RAILS_ROOT, 'tmp', 'cache_value_caches')
+      def cache_store
+        @cache_store ||= ActiveSupport::Cache.lookup_store(:mem_cache_store)
       end
 
       def lookup(object, method, options, arguments = nil)
-        value, last_cached = fetch_and_parse(object, method, arguments)
-        if !last_cached or !cached_value_is_still_valid?(value, last_cached, object, method, options)
-          value = call_and_store_value(object, method, arguments)
-        end
-        
-        value
+        new(object, method, options, arguments).lookup
+      end
+    end
+
+    attr_accessor :object, :cached_method, :options, :arguments
+    
+    def initialize(object, method, options, arguments)
+      self.object = object
+      self.cached_method = method
+      self.options = options
+      self.arguments = arguments
+    end
+
+    def lookup
+      fetch_and_parse
+      call_and_store_value unless @fetched
+    end
+    
+    def cache_key
+      options = process_options
+      if !options[:cache_key] and !object.respond_to?(:cache_key)
+        raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key")
       end
       
-      def cache_key(object, method, arguments = nil)
-        if !object.respond_to?(:cache_key)
-          raise ConfigurationException.new("object of class #{object.class.name} does not respond to :cache_key")
-        end
-        
-        key = object.cache_key.gsub('/', '_') + "_#{method}"
-        key << '_' + hex_digest(arguments) if arguments
-        key
-      end
-
-      def fetch_and_parse(object, method, arguments = nil)
-        data = cache_store.fetch(cache_key(object, method, arguments))
-        if data
-          YAML::load(data)
-        else
-          [nil, nil]
-        end
-      end
-
-      def call_and_store_value(object, method, arguments = nil)
-        without_method = caching_method_names(method).first
-        value = arguments ? object.send(without_method, *arguments) : object.send(without_method)
-        cache_store.write(cache_key(object, method, arguments), [value, Time.now].to_yaml)
-        
-        value
-      end
-
-      def cached_value_is_still_valid?(value, cached_age, object, method, options)
-        options = object.send(:method, options) if options.is_a?(Symbol)
-        if options.respond_to?(:arity)          
-          options.call(*([cached_age, object, method][0,options.arity]))
-        else
-          cached_age > Time.now - options
-        end
-      end
-
+      cache_key = options[:cache_key] || object.cache_key
+      key = cache_key.gsub('/', '_') + "_#{cached_method}"
+      key << '_' + hex_digest(arguments) if arguments
+      key
     end
+
+    def fetch_and_parse
+      data = self.class.cache_store.fetch(cache_key)
+      if data
+        @fetched = true
+        YAML::load(data)
+      else
+        @fetched = false
+        nil
+      end
+    end
+
+    def call_and_store_value
+      without_method = caching_method_names(cached_method).first
+      value = arguments ? object.send(without_method, *arguments) : object.send(without_method)
+      self.class.cache_store.write(cache_key, value.to_yaml)
+
+      value
+    end
+
+    def process_options
+      opts = options
+      opts = object.send(:method, opts) if opts.is_a?(Symbol)
+      opts = opts.call(*([object, cached_method][0,opts.arity])) if opts.respond_to?(:arity)
+      
+      if opts.respond_to?(:to_hash)
+        opts = opts.to_hash 
+      else
+        opts = { :ttl => opts, :cache_key => nil }
+      end
+      
+      raise ConfigurationException.new('Options must resolve to a hash with a :ttl') unless opts[:ttl]
+      
+      opts
+    end
+
   end
 
-  class ConfigurationException < StandardError
-  end
+  class ConfigurationException < StandardError;  end
 end
