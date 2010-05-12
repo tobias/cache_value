@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cache_value}
-  s.version = "0.3.0"
+  s.version = "0.4.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tobias Crawley"]
-  s.date = %q{2010-01-07}
+  s.date = %q{2010-05-12}
   s.email = %q{tcrawley@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/tobias/cache_value}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Easy value caching}
   s.test_files = [
     "test/cache_machine_test.rb",
