@@ -92,7 +92,7 @@ class CacheMachineTest < Test::Unit::TestCase
       @cm.expects(:cache_key).returns(key)
       now = Time.now
       Time.stubs(:now).returns(now)
-      @cm.class.cache_store.expects(:write).with(key, 2.to_yaml)
+      @cm.class.cache_store.expects(:write).with(key, 2.to_yaml, { :expires_in => 15 })
     end
     
     should 'return the data' do

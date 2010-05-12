@@ -6,10 +6,10 @@ require 'cache_value/util'
 class UtilTest < Test::Unit::TestCase
   include CacheValue::Util
   
-  should 'be true' do
-    assert true
+  context 'hex_digest' do
+    should 'return the same digest for identical hashes' do 
+      hex_digest({ :ha => 'ha'}).should == hex_digest({ :ha => 'ha'})
+    end
   end
-  
-  should 'have some tests here' 
   
 end
