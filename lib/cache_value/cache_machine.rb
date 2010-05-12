@@ -33,8 +33,9 @@ module CacheValue
     end
 
     def lookup
-      fetch_and_parse
-      call_and_store_value unless @fetched
+      value = fetch_and_parse
+      value = call_and_store_value unless @fetched
+      value
     end
     
     def cache_key

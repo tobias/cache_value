@@ -160,13 +160,27 @@ class CacheMachineTest < Test::Unit::TestCase
       @cm.lookup.should == @value
     end
 
-    
     should 'be able to cache a nil value' do
       @cm.class.cache_store.expects(:fetch).returns(nil.to_yaml)
       @cm.stubs(:cache_key).returns(nil)
       @cm.expects(:call_and_store_value).never
       @cm.lookup.should == nil
     end
-      
+    
+    context 'with a cached value' do
+      setup do
+        @cm.class.cache_store.expects(:fetch).returns(1.to_yaml)
+        @cm.stubs(:cache_key).returns('asf')
+      end
+
+      should 'not try to cache the value' do
+        @cm.expects(:call_and_store_value).never
+        @cm.lookup
+      end
+
+      should 'actually return the cached value' do
+        @cm.lookup.should == 1
+      end
+    end
   end
 end
