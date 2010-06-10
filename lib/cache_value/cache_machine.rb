@@ -89,7 +89,7 @@ module CacheValue
     def process_options
       opts = options
       opts = object.send(:method, opts) if opts.is_a?(Symbol)
-      opts = opts.call(*([object, cached_method][0,opts.arity])) if opts.respond_to?(:arity)
+      opts = opts.call(*([object, cached_method, arguments][0,opts.arity])) if opts.respond_to?(:arity)
 
       if opts.respond_to?(:to_hash)
         opts = opts.to_hash

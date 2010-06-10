@@ -11,7 +11,8 @@ class CacheMachineTest < Test::Unit::TestCase
     @obj = mock
     @method = :some_method
     @value = 2
-    @cm = CacheValue::CacheMachine.new(@obj, @method, 15, nil)
+    @arguments = [1,2]
+    @cm = CacheValue::CacheMachine.new(@obj, @method, 15, @arguments)
   end
 
   context 'at the class level' do
@@ -44,8 +45,8 @@ class CacheMachineTest < Test::Unit::TestCase
         @obj.expects(:cache_key).returns('a/cache/key')
       end
       
-      should 'include the method name at the end' do
-        assert_match /_some_method$/, @cm.cache_key
+      should 'include the method name' do
+        assert_match /_some_method/, @cm.cache_key
       end
 
       should 'not have any slashes' do
@@ -113,6 +114,15 @@ class CacheMachineTest < Test::Unit::TestCase
         now = Time.now
         proc = lambda { |a,b|}
         proc.expects(:call).with(@obj, @method).returns(1)
+        @cm.options = proc
+        
+        @cm.process_options
+      end
+      
+      should 'pass the arguments to the proc as well if the arity is high enough' do
+        now = Time.now
+        proc = lambda { |a,b,c|}
+        proc.expects(:call).with(@obj, @method, @arguments).returns(1)
         @cm.options = proc
         
         @cm.process_options
